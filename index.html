@@ -24,36 +24,71 @@
 </head>
 <body>
   <div class="container">
-    <h1>Essential Coffee Portal</h1>
+    <h1>New Teton Roast Club Portal</h1>
 
     <!-- PayPal Button Container -->
     <div id="paypal-button-container"></div>
   </div>
+  
+  <!-- Inject user context for checkout personalization -->
+<script src="/inject-context.js"></script>
 
   <!-- PayPal SDK + Button Logic -->
   <script src="https://www.paypal.com/sdk/js?client-id=AT_xxoz-PYLFSonJbhWz0Uf44qImA62UPvKxPUPaopu97NzXLX5ePfxoELjFFnxkQcW4aGMKcGgR1Hqo&currency=USD"></script>
+  
+  
   <script>
+         
     paypal.Buttons({
       createOrder: function(data, actions) {
+        const ctx = window.userContext || {};
+    
+        // 🧪 Log full context for traceability
+        console.log("🧪 Creating PayPal order with context:", ctx);
+    
+        // 🛡️ Validate context before proceeding
+        if (!ctx.email || !ctx.zip) {
+          console.warn("⚠️ Missing required context. Aborting order creation.");
+          alert("Missing user info. Please refresh or contact support.");
+          return;
+        }
+    
+        // 🧾 Generate invoice ID for internal mapping
+        const invoiceId = `sub-${ctx.email}-${Date.now()}`;
+    
         return actions.order.create({
           purchase_units: [{
-            amount: { value: '1.00' },
-            description: 'Essential Coffee Test Transaction'
+            amount: {
+              value: "22.00"
+            },
+            description: `Email: ${ctx.email}, Zip: ${ctx.zip}, Pickup: ${ctx.pickup ? "Yes" : "No"}`,
+            custom_id: ctx.email,
+            invoice_id: invoiceId
           }]
         });
       },
+    
       onApprove: function(data, actions) {
         return actions.order.capture().then(function(details) {
-          console.log('✅ Transaction completed by:', details.payer.name.given_name);
-          console.log('🧾 Full transaction details:', details);
-          alert('Transaction successful!');
+          console.log("✅ Payment captured:", details);
         });
-      },
-      onError: function(err) {
-        console.error('❌ PayPal error:', err);
       }
-    }).render('#paypal-button-container');
+    }).render("#paypal-button-container");
+    
+     
   </script>
+  
+  
+  
+  <script>
+  const userContext = window.userContext || {};
+  console.log("🔍 Dev Context Check:", {
+    email: userContext.email,
+    zip: userContext.zip,
+    pickup: userContext.pickup,
+  });
+</script>
+
 </body>
 
 </html>

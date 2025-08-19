@@ -3,12 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Essential Coffee Checkout</title>
+  <title>Essential Coffee Portal</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #fdfcf9;
+      color: #333;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
 </head>
 <body>
-  <form id="checkout-form">
-    <!-- Inputs will go here -->
+  <div class="container">
+    <h1>Essential Coffee Portal</h1>
+
+    <!-- PayPal Button Container -->
     <div id="paypal-button-container"></div>
-  </form>
+  </div>
+
+  <!-- PayPal SDK + Button Logic -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AT_xxoz-PYLFSonJbhWz0Uf44qImA62UPvKxPUPaopu97NzXLX5ePfxoELjFFnxkQcW4aGMKcGgR1Hqo&currency=USD"></script>
+  <script>
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: '1.00' },
+            description: 'Essential Coffee Test Transaction'
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          console.log('✅ Transaction completed by:', details.payer.name.given_name);
+          console.log('🧾 Full transaction details:', details);
+          alert('Transaction successful!');
+        });
+      },
+      onError: function(err) {
+        console.error('❌ PayPal error:', err);
+      }
+    }).render('#paypal-button-container');
+  </script>
 </body>
+
 </html>
